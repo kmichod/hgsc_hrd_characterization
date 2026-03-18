@@ -9,6 +9,14 @@ source(file.path(directory, "code/1.utils.R"))
 all_data <- readxl::read_excel(file.path(directory, "data/all_data.xlsx")) %>% filter(!SUID %in% neo_ids)
 all_data_VUS <- readxl::read_excel(file.path(directory, "data/all_data_VUS.xlsx")) %>% filter(!SUID %in% neo_ids)
 
+all_data <- readxl::read_excel(file.path(directory, "results/all_data.xlsx")) %>%
+  mutate(timelastfu = years_extend - years_enter) %>% filter(!SUID %in% neo_ids)
+all_data_VUS <- readxl::read_excel(file.path(directory, "results/all_data_VUS.xlsx")) %>%
+  mutate(timelastfu = years_extend - years_enter) %>% filter(!SUID %in% neo_ids)
+all_data_patho <- readxl::read_excel(file.path(directory, "results/all_data_patho.xlsx")) %>%
+  mutate(timelastfu = years_extend - years_enter) %>% filter(!SUID %in% neo_ids)
+nrow(all_data)
+
 all_data <- all_data %>%
   mutate_at(vars("any_HRD",
                 "any_HRD_mutation",
@@ -63,7 +71,7 @@ survival_function <- function(x_1_values, df) {
   
   for (x in x_1_values) {
       survival_model_1 <- coxph(formula = as.formula(paste("Surv(timelastfu, vitalstatus) ~ ", x)), data = df)
-      survival_model_2 <- coxph(formula = as.formula(paste("Surv(timelastfu, vitalstatus) ~ ", x, "+ refage + stage_b")), data = df)
+      survival_model_2 <- coxph(formula = as.formula(paste("Surv(timelastfu, vitalstatus) ~ ", x, "+ refage + stage_b + dblkstat_recode + diagyear")), data = df)
 
       tidy_results_1 <- tidy(survival_model_1, exponentiate = TRUE, conf.int = TRUE, conf.level = 0.95) %>% 
         select(term, estimate, conf.low, conf.high) %>% 
